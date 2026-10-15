@@ -1,0 +1,19 @@
+{
+  "name": "Nova Strike: Rocket Shooter",
+  "short_name": "Nova Strike",
+  "description": "High-octane mobile vertical arcade rocket shooter with procedural audio and vector graphics",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050711",
+  "theme_color": "#050711",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

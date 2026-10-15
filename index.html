@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Nova Strike" />
+  <meta name="theme-color" content="#050711" />
+  <title>NOVA STRIKE // Mobile Arcade Rocket Shooter</title>
+  
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="game-root">
+    <canvas id="game-canvas"></canvas>
+    
+    <!-- In-game touch controls layer (bomb button, pause button) -->
+    <div id="touch-controls" class="overlay-layer">
+      <button id="btn-pause" class="game-btn icon-btn" aria-label="Pause Game">
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <rect x="6" y="5" width="4" height="14" rx="1.5" fill="currentColor" />
+          <rect x="14" y="5" width="4" height="14" rx="1.5" fill="currentColor" />
+        </svg>
+      </button>
+
+      <div id="bomb-control-area">
+        <button id="btn-bomb" class="game-btn bomb-btn" aria-label="Trigger EMP Bomb">
+          <div class="bomb-badge" id="bomb-badge">3</div>
+          <svg viewBox="0 0 24 24" width="30" height="30">
+            <circle cx="12" cy="13" r="7" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M12 2v4M12 6c-2 0-3 1-3 1M18 7l-2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <circle cx="12" cy="13" r="3" fill="currentColor" />
+          </svg>
+          <span class="bomb-label">BOMB</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Screen Overlays: Menu, Pause, Game Over -->
+    <div id="ui-overlay" class="overlay-layer">
+      <!-- Main Menu -->
+      <div id="screen-main" class="menu-screen active">
+        <div class="menu-header">
+          <div class="title-badge">RETRO ARCADE SHMUP</div>
+          <h1 class="game-title">
+            <span class="title-glow">NOVA</span>
+            <span class="title-sub">STRIKE</span>
+          </h1>
+          <p class="tagline">VERTICAL VELOCITY</p>
+        </div>
+
+        <div class="ship-preview-container">
+          <canvas id="preview-canvas" width="120" height="140"></canvas>
+        </div>
+
+        <div class="menu-actions">
+          <button id="btn-play" class="action-btn primary-btn pulse-glow">
+            <span class="btn-text">LAUNCH MISSION</span>
+            <div class="btn-glow-bar"></div>
+          </button>
+          
+          <div class="stats-card">
+            <div class="stat-item">
+              <span class="stat-label">HIGH SCORE</span>
+              <span id="menu-high-score" class="stat-value">0</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-label">MAX WAVE</span>
+              <span id="menu-max-wave" class="stat-value">1</span>
+            </div>
+          </div>
+
+          <div class="menu-toggles">
+            <button id="toggle-audio" class="toggle-btn" aria-label="Toggle Sound">
+              <span class="toggle-icon" id="audio-icon">🔊</span>
+              <span class="toggle-text">SOUND: ON</span>
+            </button>
+            <button id="toggle-haptics" class="toggle-btn" aria-label="Toggle Haptics">
+              <span class="toggle-icon" id="haptics-icon">📳</span>
+              <span class="toggle-text">HAPTICS: ON</span>
+            </button>
+          </div>
+
+          <div class="instructions-card">
+            <p class="control-tip"><strong>Mobile:</strong> Drag anywhere to guide rocket. Auto-fires! Tap Bomb or use 2nd finger for EMP blast.</p>
+            <p class="control-tip"><strong>Desktop:</strong> Mouse drag or WASD/Arrows to move, Space/B for Bomb.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pause Screen -->
+      <div id="screen-pause" class="menu-screen hidden">
+        <div class="pause-card">
+          <h2 class="screen-title">MISSION PAUSED</h2>
+          <div class="pause-stats">
+            <div>CURRENT SCORE: <span id="pause-score">0</span></div>
+            <div>SECTOR WAVE: <span id="pause-wave">1</span></div>
+          </div>
+          <div class="menu-actions">
+            <button id="btn-resume" class="action-btn primary-btn">RESUME</button>
+            <button id="btn-restart-pause" class="action-btn secondary-btn">RESTART</button>
+            <button id="btn-quit" class="action-btn outline-btn">MAIN MENU</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Over Screen -->
+      <div id="screen-gameover" class="menu-screen hidden">
+        <div class="gameover-card">
+          <div id="new-high-score-banner" class="high-score-banner hidden">
+            ★ NEW HIGH SCORE ★
+          </div>
+          <h2 class="gameover-title">MISSION FAILED</h2>
+          <p class="gameover-subtitle">VESSEL DESTROYED</p>
+
+          <div class="score-summary-grid">
+            <div class="summary-box highlight">
+              <span class="sum-label">FINAL SCORE</span>
+              <span id="final-score" class="sum-val count-up">0</span>
+            </div>
+            <div class="summary-box">
+              <span class="sum-label">SECTOR REACHED</span>
+              <span id="final-wave" class="sum-val">WAVE 1</span>
+            </div>
+            <div class="summary-box">
+              <span class="sum-label">ENEMIES PURGED</span>
+              <span id="final-kills" class="sum-val">0</span>
+            </div>
+            <div class="summary-box">
+              <span class="sum-label">ACCURACY</span>
+              <span id="final-accuracy" class="sum-val">0%</span>
+            </div>
+            <div class="summary-box">
+              <span class="sum-label">MAX COMBO</span>
+              <span id="final-combo" class="sum-val">0x</span>
+            </div>
+            <div class="summary-box">
+              <span class="sum-label">ALL-TIME BEST</span>
+              <span id="final-best" class="sum-val">0</span>
+            </div>
+          </div>
+
+          <div class="menu-actions">
+            <button id="btn-retry" class="action-btn primary-btn pulse-glow">
+              <span class="btn-text">DEPLOY AGAIN</span>
+            </button>
+            <button id="btn-gameover-home" class="action-btn secondary-btn">
+              <span class="btn-text">MAIN MENU</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
